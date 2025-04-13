@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function to Tool Converter</title>
+    
+    <style>
+        :root {
+            --primary: #ffffff;
+            --primary-dark: #e2e2e2;
+            --secondary: #333333;
+            --background: #121212;
+            --card-bg: #1e1e1e;
+            --text: #ffffff;
+            --accent: #666666;
+            --success: #4caf50;
+            --error: #f44336;
+            --code-bg: #252525;
+            --border: #444444;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            color: var(--text);
+            background-color: var(--background);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        header {
+            background-color: var(--secondary);
+            color: var(--text);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+        
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.4rem;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 300px;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            background-color: var(--code-bg);
+            color: var(--text);
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: var(--background);
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .result {
+            position: relative;
+            margin-top: 1rem;
+            padding: 0;
+            background-color: var(--code-bg);
+            border-radius: 0.375rem;
+            overflow: auto;
+            max-height: 300px;
+            border: 1px solid var(--border);
+        }
+        
+        .result pre {
+            margin: 0;
+            padding: 1rem;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background-color: var(--accent);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            z-index: 3;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        .error-msg {
+            color: var(--error);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .success-msg {
+            color: var(--success);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        
+        .example-list {
+            margin-top: 1rem;
+        }
+        
+        .example-btn {
+            background-color: var(--secondary);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .example-btn:hover {
+            background-color: var(--accent);
+        }
+        
+        .instructions {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-radius: 0.375rem;
+            border: 1px solid var(--border);
+        }
+        
+        code {
+            background-color: var(--code-bg);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            color: var(--primary);
+        }
+        
+        pre {
+            margin: 0;
+            border-radius: 0.375rem;
+        }
+        
+        .output-content {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: var(--text);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow-y: auto;
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 10% auto;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            width: 80%;
+            max-width: 800px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            color: var(--text);
+        }
+        
+        .close {
+            color: var(--text);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--primary);
+        }
+        
+        .info-btn {
+            background-color: var(--accent);
+            color: var(--text);
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        
+        .info-btn:hover {
+            background-color: var(--secondary);
+        }
+        
+        /* Syntax highlighting for Python code */
+        .keyword { color: #ff79c6; }
+        .function { color: #8be9fd; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .comment { color: #6272a4; }
+        .decorator { color: #50fa7b; }
+        .operator { color: #ff79c6; }
+        .type { color: #8be9fd; }
+        
+        .header-buttons {
+            display: flex;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+        
+        .header-btn {
+            margin: 0 0.5rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            background-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Function to Tool Converter</h1>
+        <p>Convert Python functions to standardized tool descriptions for AI agents</p>
+        <div class="header-buttons">
+            <button id="why-important-btn" class="header-btn">Why This Matters</button>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="content">
+            <div class="card">
+                <h2>Paste Your Python Function</h2>
+                <textarea id="function-input" spellcheck="false" autocomplete="off" placeholder="Paste your Python function with @tool decorator here..."></textarea>
+                <button id="convert-btn">Convert Function</button>
+                <button id="clear-btn">Clear</button>
+                <button id="highlight-btn">Highlight Syntax</button>
+                
+                <div class="example-list">
+                    <h3>Examples:</h3>
+                    <button class="example-btn" data-example="calculator">Calculator</button>
+                    <button class="example-btn" data-example="weather">Weather Lookup</button>
+                    <button class="example-btn" data-example="translate">Translator</button>
+                </div>
+                
+                <div id="error-container" class="error-msg" style="display: none;"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Tool Output</h2>
+                <div class="result">
+                    <pre class="output-content" id="output-display">Your tool description will appear here...</pre>
+                    <button class="copy-btn" id="copy-btn">Copy</button>
+                </div>
+                <div id="copy-status" class="success-msg" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>How to Use</h2>
+            <ol>
+                <li>Write a Python function with type hints and docstring</li>
+                <li>Add the <code>@tool</code> decorator</li>
+                <li>Paste the entire function (including imports if needed)</li>
+                <li>Click "Convert Function"</li>
+                <li>Copy the standardized tool description</li>
+            </ol>
+            
+            <h3>Function Requirements:</h3>
+            <ul>
+                <li>Must include type hints for parameters and return value</li>
+                <li>Should include a docstring describing what the function does</li>
+                <li>Decorator should be included in the pasted code</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Modal for why it's important -->
+    <div id="importance-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Why Function-to-Tool Conversion Matters for AI Agents</h2>
+            
+            <p>AI agents need structured representations of available tools and functions to understand:</p>
+            <ul>
+                <li><strong>What tools are available</strong> to solve a given problem</li>
+                <li><strong>How to use each tool</strong> correctly (required parameters, types, etc.)</li>
+                <li><strong>What each tool does</strong> and when it's appropriate to use it</li>
+                <li><strong>What outputs to expect</strong> from each tool</li>
+            </ul>
+            
+            <h3>Benefits of Standardized Tool Descriptions:</h3>
+            <ol>
+                <li><strong>Consistent Format:</strong> Creates a unified way to describe functions regardless of their implementation</li>
+                <li><strong>Improved Tool Selection:</strong> Helps AI models choose the right tool based on clear descriptions</li>
+                <li><strong>Parameter Validation:</strong> Ensures the AI provides the correct parameter types</li>
+                <li><strong>Simplified Integration:</strong> Makes it easier to add new tools to your AI agent system</li>
+                <li><strong>Self-Documentation:</strong> Creates human-readable descriptions from code</li>
+            </ol>
+            
+            <h3>Real-World Applications:</h3>
+            <p>This standardization enables AI agents to:</p>
+            <ul>
+                <li>Call external APIs with correct parameters</li>
+                <li>Choose appropriate tools from a large toolset</li>
+                <li>Chain multiple tools together in correct sequences</li>
+                <li>Handle errors and exceptions gracefully</li>
+                <li>Generate code that works with your existing systems</li>
+            </ul>
+            
+            <p>By converting Python functions to standardized tool descriptions, developers create an interface layer that helps AI models understand and use functions more effectively, leading to more capable and reliable AI agents.</p>
+        </div>
+    </div>
+    
+    <button class="info-btn" id="floating-info-btn">?</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const functionInput = document.getElementById('function-input');
+            const convertBtn = document.getElementById('convert-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const highlightBtn = document.getElementById('highlight-btn');
+            const outputDisplay = document.getElementById('output-display');
+            const copyBtn = document.getElementById('copy-btn');
+            const copyStatus = document.getElementById('copy-status');
+            const errorContainer = document.getElementById('error-container');
+            const exampleBtns = document.querySelectorAll('.example-btn');
+            const modal = document.getElementById('importance-modal');
+            const whyImportantBtn = document.getElementById('why-important-btn');
+            const floatingInfoBtn = document.getElementById('floating-info-btn');
+            const closeBtn = document.querySelector('.close');
+            
+            // Example functions
+            const examples = {
+                calculator: `@tool
+def calculator(a: int, b: int, operation: str = "add") -> int:
+    """Perform basic arithmetic operations on two integers.
+    
+    Operations supported: add, subtract, multiply, divide
+    """
+    if operation == "add":
+        return a + b
+    elif operation == "subtract":
+        return a - b  
+    elif operation == "multiply":
+        return a * b
+    elif operation == "divide":
+        if b == 0:
+            raise ValueError("Cannot divide by zero")
+        return a / b
+    else:
+        raise ValueError(f"Unsupported operation: {operation}")`,
+                
+                weather: `@tool
+def get_weather(city: str, country: str = "US", units: str = "metric") -> dict:
+    """Get current weather information for a specific location.
+    
+    Returns temperature, humidity, and conditions.
+    """
+    # In a real implementation, this would call a weather API
+    # This is just a placeholder
+    return {
+        "city": city,
+        "country": country,
+        "temperature": 22.5,
+        "humidity": 65,
+        "conditions": "Partly cloudy"
+    }`,
+                
+                translate: `@tool
+def translate_text(text: str, source_lang: str, target_lang: str) -> str:
+    """Translate text from source language to target language.
+    
+    Languages should be specified using ISO 639-1 codes (e.g., 'en', 'es', 'fr')
+    """
+    # In a real implementation, this would call a translation API
+    # This is just a placeholder
+    return f"Translated from {source_lang} to {target_lang}: {text}"`,
+            };
+            
+            // Modal controls
+            whyImportantBtn.addEventListener('click', function() {
+                modal.style.display = "block";
+            });
+            
+            floatingInfoBtn.addEventListener('click', function() {
+                modal.style.display = "block";
+            });
+            
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = "none";
+            });
+            
+            window.addEventListener('click', function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+            
+            // Load examples
+            exampleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const exampleName = this.getAttribute('data-example');
+                    functionInput.value = examples[exampleName];
+                });
+            });
+            
+            // Simple Python syntax highlighting
+            function highlightPythonSyntax(code) {
+                if (!code) return '';
+                
+                // Define regex patterns for Python syntax
+                const patterns = [
+                    { pattern: /(^|\s)(def|class|import|from|as|return|if|elif|else|for|while|try|except|finally|raise|with|in|is|and|or|not|True|False|None)(\s|$)/g, className: 'keyword' },
+                    { pattern: /@\w+/g, className: 'decorator' },
+                    { pattern: /("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')/g, className: 'string' },
+                    { pattern: /(\b\d+\.?\d*|\.\d+)\b/g, className: 'number' },
+                    { pattern: /#.*/g, className: 'comment' },
+                    { pattern: /\b([A-Z][A-Za-z0-9_]*)\b/g, className: 'type' },
+                    { pattern: /(-\>|==|!=|<=|>=|<|>|\+|-|\*|\/|=)/g, className: 'operator' },
+                    { pattern: /\b(\w+)(?=\s*\()/g, className: 'function' }
+                ];
+                
+                // Escape HTML first
+                let highlightedCode = code.replace(/&/g, '&amp;')
+                                         .replace(/</g, '&lt;')
+                                         .replace(/>/g, '&gt;');
+                
+                // Apply highlighting patterns
+                patterns.forEach(item => {
+                    highlightedCode = highlightedCode.replace(
+                        item.pattern, 
+                        match => `<span class="${item.className}">${match}</span>`
+                    );
+                });
+                
+                // Replace newlines with <br> tags
+                return highlightedCode.replace(/\n/g, '<br>');
+            }
+            
+            // Highlight button handler
+            highlightBtn.addEventListener('click', function() {
+                const code = functionInput.value;
+                if (code) {
+                    const tempTextarea = document.createElement('textarea');
+                    tempTextarea.value = code;
+                    
+                    // Create highlighted div
+                    const highlightedDiv = document.createElement('div');
+                    highlightedDiv.style.cssText = `
+                        height: 300px;
+                        overflow: auto;
+                        border: 1px solid var(--border);
+                        border-radius: 0.375rem;
+                        padding: 0.75rem;
+                        font-family: 'Courier New', Courier, monospace;
+                        font-size: 0.875rem;
+                        line-height: 1.5;
+                        background-color: var(--code-bg);
+                        color: var(--text);
+                        margin-bottom: 1rem;
+                        white-space: pre;
+                    `;
+                    highlightedDiv.innerHTML = highlightPythonSyntax(code);
+                    
+                    // Replace textarea with highlighted div
+                    const parent = functionInput.parentNode;
+                    parent.replaceChild(highlightedDiv, functionInput);
+                    
+                    // Change highlight button to edit button
+                    highlightBtn.textContent = "Edit Code";
+                    highlightBtn.onclick = function() {
+                        // Replace highlighted div with textarea
+                        parent.replaceChild(functionInput, highlightedDiv);
+                        highlightBtn.textContent = "Highlight Syntax";
+                        highlightBtn.onclick = arguments.callee.caller;
+                    };
+                }
+            });
+            
+            // Parse function to extract tool information
+            function parseFunction(code) {
+                try {
+                    // Extract function name
+                    const nameMatch = code.match(/def\s+(\w+)\s*\(/);
+                    if (!nameMatch) throw new Error("Could not find function name");
+                    const name = nameMatch[1];
+                    
+                    // Extract docstring
+                    const docstringMatch = code.match(/"""([\s\S]*?)"""/);
+                    const description = docstringMatch ? docstringMatch[1].trim() : "";
+                    
+                    // Extract parameters and type hints
+                    const signatureMatch = code.match(/def\s+\w+\s*\(([\s\S]*?)\)\s*->\s*([\w\[\],\s]+):/);
+                    if (!signatureMatch) throw new Error("Could not parse function signature");
+                    
+                    const paramsStr = signatureMatch[1];
+                    const returnType = signatureMatch[2].trim();
+                    
+                    // Process parameters
+                    const paramsList = paramsStr.split(',').map(p => p.trim());
+                    const arguments = [];
+                    
+                    for (const param of paramsList) {
+                        if (!param) continue;
+                        
+                        // Handle param with default value
+                        const paramParts = param.split('=');
+                        const paramWithType = paramParts[0].trim();
+                        
+                        // Extract type hint
+                        const typeMatch = paramWithType.match(/(\w+)\s*:\s*([\w\[\],\s]+)/);
+                        if (!typeMatch) throw new Error(`Could not parse parameter: ${param}`);
+                        
+                        const paramName = typeMatch[1];
+                        const paramType = typeMatch[2].trim();
+                        
+                        // Check if parameter has default value
+                        const hasDefault = paramParts.length > 1;
+                        const defaultValue = hasDefault ? paramParts[1].trim() : null;
+                        
+                        arguments.push({
+                            name: paramName,
+                            type: paramType,
+                            default: defaultValue
+                        });
+                    }
+                    
+                    return {
+                        name,
+                        description,
+                        arguments,
+                        output: returnType
+                    };
+                    
+                } catch (error) {
+                    throw new Error(`Failed to parse function: ${error.message}`);
+                }
+            }
+            
+            // Format tool information to string output
+            function formatToolOutput(toolInfo) {
+                const args = toolInfo.arguments.map(arg => {
+                    return `${arg.name}: ${arg.type}${arg.default ? ` = ${arg.default}` : ''}`;
+                }).join(', ');
+                
+                return `Tool Name: ${toolInfo.name},\nDescription: ${toolInfo.description},\nArguments: ${args},\nOutputs: ${toolInfo.output}`;
+            }
+            
+            // Convert function
+            convertBtn.addEventListener('click', function() {
+                let code;
+                
+                // Check if we're in highlighted view
+                const highlightedDiv = document.querySelector('.card div[style*="white-space: pre"]');
+                if (highlightedDiv) {
+                    // Get text from the highlighted div
+                    code = highlightedDiv.textContent.trim();
+                } else {
+                    code = functionInput.value.trim();
+                }
+                
+                errorContainer.style.display = 'none';
+                
+                if (!code) {
+                    errorContainer.textContent = 'Please enter a Python function';
+                    errorContainer.style.display = 'block';
+                    return;
+                }
+                
+                try {
+                    const toolInfo = parseFunction(code);
+                    const toolOutput = formatToolOutput(toolInfo);
+                    outputDisplay.textContent = toolOutput;
+                } catch (error) {
+                    errorContainer.textContent = error.message;
+                    errorContainer.style.display = 'block';
+                    outputDisplay.textContent = "Your tool description will appear here...";
+                }
+            });
+            
+            // Clear input
+            clearBtn.addEventListener('click', function() {
+                // Check if we're in highlighted view
+                const highlightedDiv = document.querySelector('.card div[style*="white-space: pre"]');
+                if (highlightedDiv) {
+                    // We need to restore the textarea first
+                    const parent = highlightedDiv.parentNode;
+                    parent.replaceChild(functionInput, highlightedDiv);
+                    highlightBtn.textContent = "Highlight Syntax";
+                    // Reset the highlight button click handler
+                    highlightBtn.onclick = function() {
+                        const code = functionInput.value;
+                        if (code) {
+                            const highlightedDiv = document.createElement('div');
+                            highlightedDiv.style.cssText = `
+                                height: 300px;
+                                overflow: auto;
+                                border: 1px solid var(--border);
+                                border-radius: 0.375rem;
+                                padding: 0.75rem;
+                                font-family: 'Courier New', Courier, monospace;
+                                font-size: 0.875rem;
+                                line-height: 1.5;
+                                background-color: var(--code-bg);
+                                color: var(--text);
+                                margin-bottom: 1rem;
+                                white-space: pre;
+                            `;
+                            highlightedDiv.innerHTML = highlightPythonSyntax(code);
+                            
+                            const parent = functionInput.parentNode;
+                            parent.replaceChild(highlightedDiv, functionInput);
+                            
+                            highlightBtn.textContent = "Edit Code";
+                            highlightBtn.onclick = arguments.callee.caller;
+                        }
+                    };
+                }
+                
+                functionInput.value = '';
+                outputDisplay.textContent = "Your tool description will appear here...";
+                errorContainer.style.display = 'none';
+                copyStatus.style.display = 'none';
+            });
+            
+            // Copy output
+            copyBtn.addEventListener('click', function() {
+                const text = outputDisplay.textContent;
+                navigator.clipboard.writeText(text).then(() => {
+                    copyStatus.textContent = 'Copied to clipboard!';
+                    copyStatus.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        copyStatus.style.display = 'none';
+                    }, 2000);
+                }).catch(err => {
+                    copyStatus.textContent = 'Failed to copy: ' + err;
+                    copyStatus.style.display = 'block';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
