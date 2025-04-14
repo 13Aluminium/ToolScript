@@ -15,7 +15,7 @@ This tool takes your function and extracts:
 
 > Paste your Python function and convert it instantly into a structured tool description.
 
-🚀 [Try it live](https://t.co/x0UjMxqonb)
+🚀 [Try it live](https://13aluminium.github.io/ToolScript/)
 ---
 
 ## 🧠 Why This Matters
@@ -33,7 +33,7 @@ It’s especially useful for:
 
 Here’s a quick walkthrough of what the tool can do:
 
-[![Watch the demo](thumb.jpg)]([https://vimeo.com/1075209461?share=copy](https://13aluminium.github.io/ToolScript/))
+[![Watch the demo](https://vimeo.com/1075209461?share=copy)]
 
 ---
 
